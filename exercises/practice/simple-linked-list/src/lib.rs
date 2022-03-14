@@ -1,66 +1,97 @@
 use std::iter::FromIterator;
 
-pub struct SimpleLinkedList<T> {
-    // Delete this field
-    // dummy is needed to avoid unused parameter error during compilation
-    dummy: ::std::marker::PhantomData<T>,
+pub struct SimpleLinkedList<T: Clone + Copy> {
+    head: Option<Box<Node<T>>>,
 }
 
-impl<T> SimpleLinkedList<T> {
+struct Node<T: Clone + Copy> {
+    data: T,
+    next: Option<Box<Node<T>>>,
+}
+
+impl<T: Clone + Copy> SimpleLinkedList<T> {
     pub fn new() -> Self {
-        unimplemented!()
+        Self {
+            ..Default::default()
+        }
     }
 
-    // You may be wondering why it's necessary to have is_empty()
-    // when it can easily be determined from len().
-    // It's good custom to have both because len() can be expensive for some types,
-    // whereas is_empty() is almost always cheap.
-    // (Also ask yourself whether len() is expensive for SimpleLinkedList)
     pub fn is_empty(&self) -> bool {
-        unimplemented!()
+        self.head.is_none()
     }
 
     pub fn len(&self) -> usize {
-        unimplemented!()
+        let mut count: usize = 0;
+        let mut node: &Option<Box<Node<T>>> = &self.head;
+        while (*node).is_some() {
+            count += 1;
+            node = &(node.as_ref().unwrap().next);
+        }
+        count
     }
 
-    pub fn push(&mut self, _element: T) {
-        unimplemented!()
+    pub fn push(&mut self, element: T) {
+        self.head = Some(Box::new(Node {
+            data: element,
+            next: self.head.take(),
+        }))
     }
 
     pub fn pop(&mut self) -> Option<T> {
-        unimplemented!()
+        if self.head.is_none() {
+            None
+        } else {
+            let mut head = self.head.take().unwrap();
+            self.head = head.next.take();
+            Some(head.data)
+        }
     }
 
     pub fn peek(&self) -> Option<&T> {
-        unimplemented!()
+        match self.head.is_none() {
+            true => None,
+            false => Some(&self.head.as_ref().unwrap().data),
+        }
     }
 
     #[must_use]
     pub fn rev(self) -> SimpleLinkedList<T> {
-        unimplemented!()
+        let mut linked_list = SimpleLinkedList::new();
+
+        let mut node: &Option<Box<Node<T>>> = &self.head;
+        while (*node).is_some() {
+            linked_list.push(node.as_ref().unwrap().data);
+            node = &(node.as_ref().unwrap().next);
+        }
+
+        linked_list
     }
 }
 
-impl<T> FromIterator<T> for SimpleLinkedList<T> {
-    fn from_iter<I: IntoIterator<Item = T>>(_iter: I) -> Self {
-        unimplemented!()
+impl<T: Clone + Copy> Default for SimpleLinkedList<T> {
+    fn default() -> Self {
+        Self { head: None }
     }
 }
 
-// In general, it would be preferable to implement IntoIterator for SimpleLinkedList<T>
-// instead of implementing an explicit conversion to a vector. This is because, together,
-// FromIterator and IntoIterator enable conversion between arbitrary collections.
-// Given that implementation, converting to a vector is trivial:
-//
-// let vec: Vec<_> = simple_linked_list.into_iter().collect();
-//
-// The reason this exercise's API includes an explicit conversion to Vec<T> instead
-// of IntoIterator is that implementing that interface is fairly complicated, and
-// demands more of the student than we expect at this point in the track.
+impl<T: Clone + Copy> FromIterator<T> for SimpleLinkedList<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        iter.into_iter()
+            .fold(SimpleLinkedList::new(), |mut linked_list, element| {
+                linked_list.push(element);
+                linked_list
+            })
+    }
+}
 
-impl<T> From<SimpleLinkedList<T>> for Vec<T> {
-    fn from(mut _linked_list: SimpleLinkedList<T>) -> Vec<T> {
-        unimplemented!()
+impl<T: Clone + Copy> From<SimpleLinkedList<T>> for Vec<T> {
+    fn from(mut linked_list: SimpleLinkedList<T>) -> Vec<T> {
+        let mut v: Vec<T> = Vec::new();
+
+        while let Some(element) = linked_list.pop() {
+            v.insert(0, element)
+        }
+
+        v
     }
 }

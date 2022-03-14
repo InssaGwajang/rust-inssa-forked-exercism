@@ -1,3 +1,8 @@
 pub fn reverse(input: &str) -> String {
-    unimplemented!("Write a function to reverse {}", input);
+    input.chars().rev().collect()
+
+    // input.chars().rev().fold(String::new(), |mut s, c| {
+    //     s.push(c);
+    //     s
+    // })
 }
