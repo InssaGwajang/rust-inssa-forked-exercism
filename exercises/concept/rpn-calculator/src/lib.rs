@@ -1,5 +1,3 @@
-use self::CalculatorInput::*;
-
 #[derive(Debug)]
 pub enum CalculatorInput {
     Add,
@@ -10,60 +8,28 @@ pub enum CalculatorInput {
 }
 
 pub fn evaluate(inputs: &[CalculatorInput]) -> Option<i32> {
-    let mut stack: Vec<i32> = Vec::new();
+    use CalculatorInput::*;
 
-    for input in inputs {
-        match input {
-            Value(value) => stack.push(*value),
-            Add => {
-                if stack.len() >= 2 {
-                    let n2 = stack.pop().unwrap();
-                    let n1 = stack.pop().unwrap();
-
-                    stack.push(n1 + n2);
-                } else {
-                    return None;
-                }
+    match inputs
+        .iter()
+        .try_fold(Vec::<i32>::new(), |mut stack, input| {
+            if let Some(new) = match input {
+                Value(value) => Some(*value),
+                Add => stack.pop().and_then(|n2| stack.pop().map(|n1| n1 + n2)),
+                Subtract => stack.pop().and_then(|n2| stack.pop().map(|n1| n1 - n2)),
+                Multiply => stack.pop().and_then(|n2| stack.pop().map(|n1| n1 * n2)),
+                Divide => stack.pop().and_then(|n2| stack.pop().map(|n1| n1 / n2)),
+            } {
+                stack.push(new);
+                Some(stack)
+            } else {
+                None
             }
-            Subtract => {
-                if stack.len() >= 2 {
-                    let n2 = stack.pop().unwrap();
-                    let n1 = stack.pop().unwrap();
-
-                    stack.push(n1 - n2);
-                } else {
-                    return None;
-                }
-            }
-            Multiply => {
-                if stack.len() >= 2 {
-                    let n2 = stack.pop().unwrap();
-                    let n1 = stack.pop().unwrap();
-
-                    stack.push(n1 * n2);
-                } else {
-                    return None;
-                }
-            }
-            Divide => {
-                if stack.len() >= 2 {
-                    let n2 = stack.pop().unwrap();
-                    let n1 = stack.pop().unwrap();
-
-                    stack.push(n1 / n2);
-                } else {
-                    return None;
-                }
-            }
-        }
+        }) {
+        Some(mut stack) => stack.pop().and_then(|v| match stack.is_empty() {
+            true => Some(v),
+            false => None,
+        }),
+        None => None,
     }
-
-    match stack.len() {
-        1 => stack.pop(),
-        _ => None,
-    }
-
-    // stack
-    //     .pop()
-    //     .and_then(|result| if stack.is_empty() { Some(result) } else { None })
 }

@@ -1,4 +1,4 @@
-const FIBONACCI_NUM: usize = 5;
+const FIBONACCI_LENGTH: usize = 5;
 
 pub fn create_empty() -> Vec<u8> {
     Vec::<u8>::new()
@@ -9,13 +9,14 @@ pub fn create_buffer(count: usize) -> Vec<u8> {
 }
 
 pub fn fibonacci() -> Vec<u8> {
-    let mut result = Vec::<u8>::with_capacity(FIBONACCI_NUM);
+    let mut buffer = create_buffer(FIBONACCI_LENGTH);
     let mut prev = 0;
-    let mut current = 1;
+    let mut last = 1;
 
-    for _ in 0..FIBONACCI_NUM {
-        result.push(current);
-        (prev, current) = (current, prev + current);
+    for number in buffer.iter_mut() {
+        *number = last;
+        (prev, last) = (last, prev + last);
     }
-    result
+
+    buffer
 }

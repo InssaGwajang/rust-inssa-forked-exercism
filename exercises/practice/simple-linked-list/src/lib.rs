@@ -23,7 +23,7 @@ impl<T: Clone + Copy> SimpleLinkedList<T> {
     pub fn len(&self) -> usize {
         let mut count: usize = 0;
         let mut node: &Option<Box<Node<T>>> = &self.head;
-        while (*node).is_some() {
+        while node.is_some() {
             count += 1;
             node = &(node.as_ref().unwrap().next);
         }
@@ -38,28 +38,28 @@ impl<T: Clone + Copy> SimpleLinkedList<T> {
     }
 
     pub fn pop(&mut self) -> Option<T> {
-        if self.head.is_none() {
-            None
-        } else {
-            let mut head = self.head.take().unwrap();
-            self.head = head.next.take();
-            Some(head.data)
+        match self.head.is_some() {
+            true => {
+                let mut head = self.head.take().unwrap();
+                self.head = head.next.take();
+                Some(head.data)
+            }
+            false => None,
         }
     }
 
     pub fn peek(&self) -> Option<&T> {
-        match self.head.is_none() {
-            true => None,
-            false => Some(&self.head.as_ref().unwrap().data),
+        match self.head.is_some() {
+            true => Some(&self.head.as_ref().unwrap().data),
+            false => None,
         }
     }
 
-    #[must_use]
     pub fn rev(self) -> SimpleLinkedList<T> {
         let mut linked_list = SimpleLinkedList::new();
 
         let mut node: &Option<Box<Node<T>>> = &self.head;
-        while (*node).is_some() {
+        while node.is_some() {
             linked_list.push(node.as_ref().unwrap().data);
             node = &(node.as_ref().unwrap().next);
         }
@@ -87,11 +87,9 @@ impl<T: Clone + Copy> FromIterator<T> for SimpleLinkedList<T> {
 impl<T: Clone + Copy> From<SimpleLinkedList<T>> for Vec<T> {
     fn from(mut linked_list: SimpleLinkedList<T>) -> Vec<T> {
         let mut v: Vec<T> = Vec::new();
-
         while let Some(element) = linked_list.pop() {
             v.insert(0, element)
         }
-
         v
     }
 }

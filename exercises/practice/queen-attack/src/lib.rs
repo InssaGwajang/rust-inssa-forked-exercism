@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub struct ChessPosition {
-    x: i32,
-    y: i32,
+    rank: i32,
+    file: i32,
 }
 
 #[derive(Debug)]
@@ -12,27 +12,21 @@ pub struct Queen {
 impl ChessPosition {
     pub fn new(rank: i32, file: i32) -> Option<Self> {
         match (rank, file) {
-            (0..=7, 0..=7) => Some(Self { x: rank, y: file }),
+            (0..=7, 0..=7) => Some(Self { rank, file }),
             _ => None,
         }
-        // for number in [rank, file] {
-        //     if number < 0 || number >= CHESSBOARD_SIZE {
-        //         return None;
-        //     }
-        // }
-        // Some(Self(rank, file))
     }
 }
 
 impl Queen {
     pub fn new(position: ChessPosition) -> Self {
-        Self { position: position }
+        Self { position }
     }
 
     pub fn can_attack(&self, other: &Queen) -> bool {
-        self.position.x == other.position.x
-            || self.position.y == other.position.y
-            || (self.position.x - other.position.x).abs()
-                == (self.position.y - other.position.y).abs()
+        self.position.rank == other.position.rank
+            || self.position.file == other.position.file
+            || (self.position.rank - other.position.rank).abs()
+                == (self.position.file - other.position.file).abs()
     }
 }

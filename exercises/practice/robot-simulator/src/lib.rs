@@ -1,14 +1,15 @@
 use self::Direction::*;
+
 #[derive(PartialEq, Debug)]
-// #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Direction {
     North,
     East,
     South,
     West,
 }
+
 impl Direction {
-    fn turn_right(&self) -> Self {
+    fn rotate_clockwise(&self) -> Self {
         match self {
             North => East,
             East => South,
@@ -17,7 +18,7 @@ impl Direction {
         }
     }
 
-    fn turn_left(&self) -> Self {
+    fn rotate_counterclockwise(&self) -> Self {
         match self {
             North => West,
             West => South,
@@ -27,42 +28,39 @@ impl Direction {
     }
 }
 
-// #[derive(Clone, Copy)]
 pub struct Robot {
     x: i32,
     y: i32,
-    d: Direction,
+    direction: Direction,
 }
+
 impl Robot {
-    pub fn new(x: i32, y: i32, d: Direction) -> Self {
-        Self { x: x, y: y, d: d }
+    pub fn new(x: i32, y: i32, direction: Direction) -> Self {
+        Self { x, y, direction }
     }
 
-    #[must_use]
     pub fn turn_right(self) -> Self {
         Self {
-            d: self.d.turn_right(),
+            direction: self.direction.rotate_clockwise(),
             ..self
         }
     }
 
-    #[must_use]
     pub fn turn_left(self) -> Self {
         Self {
-            d: self.d.turn_left(),
+            direction: self.direction.rotate_counterclockwise(),
             ..self
         }
     }
 
-    #[must_use]
     pub fn advance(self) -> Self {
         Self {
-            x: match self.d {
+            x: match self.direction {
                 East => self.x + 1,
                 West => self.x - 1,
                 _ => self.x,
             },
-            y: match self.d {
+            y: match self.direction {
                 North => self.y + 1,
                 South => self.y - 1,
                 _ => self.y,
@@ -71,7 +69,6 @@ impl Robot {
         }
     }
 
-    #[must_use]
     pub fn instructions(self, instructions: &str) -> Self {
         instructions.chars().fold(self, |robot, c| match c {
             'L' => robot.turn_left(),
@@ -79,17 +76,6 @@ impl Robot {
             'A' => robot.advance(),
             _ => robot,
         })
-
-        // let mut robot = Self { ..self };
-
-        // instructions.chars().for_each(|c| match c {
-        //     'L' => robot = robot.turn_left(),
-        //     'R' => robot = robot.turn_right(),
-        //     'A' => robot = robot.advance(),
-        //     _ => panic!("invalid instruction"),
-        // });
-
-        // robot
     }
 
     pub fn position(&self) -> (i32, i32) {
@@ -97,6 +83,6 @@ impl Robot {
     }
 
     pub fn direction(&self) -> &Direction {
-        &self.d
+        &self.direction
     }
 }
